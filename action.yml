@@ -1,11 +1,13 @@
-name: 'Bump Expo build numbers'
-description: 'Bumps the buildNumber and versionCode in app.json'
-author: 'Robert Herber'
+name: 'Set Expo build numbers'
+description: 'Sets the version, buildNumber and versionCode in app.json'
+author: 'Sina Khelil'
 outputs:
+  version:
+    description: The version number in expo app.json
   versioncode:
-    description: The bumped Android versioncode
+    description: The set Android versioncode
   buildnumber:
-    description: The bumped iOS buildnumber
+    description: The set iOS buildnumber
 inputs:
   filepath: # change this
     required: false
@@ -15,6 +17,10 @@ inputs:
     required: false
     description: 'Comma-separated list of platforms (iOS and Android available)'
     default: 'ios,android'
+  tag: # change this
+    required: true
+    description: 'The tag to use for the version number'
+    default: 'v1.0.0'
 runs:
   using: 'node12'
   main: 'dist/index.js'

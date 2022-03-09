@@ -1,18 +1,19 @@
-[![build-test](https://github.com/robertherber/github-action-bump-eas-buildnumber/actions/workflows/test.yml/badge.svg)](https://github.com/robertherber/github-action-bump-eas-buildnumber/actions/workflows/test.yml)
+[![build-test](https://github.com/robertherber/github-action-bump-eas-buildnumber/actions/workflows/test.yml/badge.svg)](https://github.com/incognos/github-action-eas-buildnumber-by-tag/actions/workflows/test.yml)
 
 # Usage
 
-This action bumps the versionCode and buildNumber in app.json for Expo projects. In your workflow you probably want to commit/push the changes after your build is successful.
+This action sets the versionCode and buildNumber in app.json for Expo projects based on the tag. In your workflow you probably want to commit/push the changes after your build is successful.
 
 Input:
 
 - filepath - path to your app.json (optional, defaults to './app.json')
 - platforms - Comma-separated list of platforms to bump (optional, defaults to 'ios,android')
+- tag - the tag version number, i.e. 'v1.0.1'
 
 Output:
 
-- versioncode - The bumped Android versioncode
-- buildnumber - The bumped iOS buildnumber
+- versioncode - The bumped Android versioncode, e.g. 1000001 or v2.4.6 == 2004006 (major * 1000000 + minor * 1000 + patch)
+- buildnumber - The bumped iOS buildnumber removes any non-numeric or non-'.'
 
 Limitations:
 
@@ -20,18 +21,6 @@ Limitations:
 - Please note that it will only work for app.json and not app.config.js, then you'll have to roll your own.
 
 # Contribution Guide
-
-## Create a JavaScript Action using TypeScript
-
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
-
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
-
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
-
-### Create an action from this template
-
-Click the `Use this Template` and provide the new repo details for your action
 
 ### Code in Main
 

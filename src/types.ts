@@ -1,5 +1,6 @@
 export type Config = {
-  expo?: {
+  expo: {
+    version: string
     ios?: {
       buildNumber?: string
     }
