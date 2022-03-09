@@ -1,10 +1,9 @@
-require('./sourcemap-register.js');module.exports =
-/******/ (() => { // webpackBootstrap
+require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 109:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -39,15 +38,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__webpack_require__(186));
-const fs_1 = __importDefault(__webpack_require__(747));
-const detect_indent_1 = __importDefault(__webpack_require__(84));
-const utils_1 = __webpack_require__(918);
+/* eslint-disable i18n-text/no-en */
+const core = __importStar(__nccwpck_require__(186));
+const utils_1 = __nccwpck_require__(918);
+const detect_indent_1 = __importDefault(__nccwpck_require__(84));
+const fs_1 = __importDefault(__nccwpck_require__(747));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const filepath = core.getInput('filepath');
             const platformsStr = core.getInput('platforms');
+            const tagStr = core.getInput('tag');
             core.debug(`Looking for app.json at '${filepath}'`);
             const jsonStr = fs_1.default.readFileSync(filepath, 'utf-8');
             const indentInfo = detect_indent_1.default(jsonStr);
@@ -56,13 +57,15 @@ function run() {
             const json = JSON.parse(jsonStr);
             const platforms = platformsStr.toLowerCase().split(',');
             core.debug(`Platforms to process: ${platforms.join(',')}`);
+            const nextVersion = tagStr.replace(/^v/, '');
+            json.expo.version = nextVersion;
             if (platforms.includes('android')) {
-                const versionCode = utils_1.bumpAndroid(json);
+                const versionCode = utils_1.setAndroidVersion(json, nextVersion);
                 core.debug(`Bump android versionCode to ${versionCode}`);
                 core.setOutput('versioncode', versionCode);
             }
             if (platforms.includes('ios')) {
-                const nextBuildNumber = utils_1.bumpIOS(json);
+                const nextBuildNumber = utils_1.setIOSVersion(json, nextVersion);
                 core.debug(`Bumping android versionCode to ${nextBuildNumber}`);
                 core.setOutput('buildnumber', nextBuildNumber);
             }
@@ -71,7 +74,9 @@ function run() {
             fs_1.default.writeFileSync(filepath, output);
         }
         catch (error) {
-            core.setFailed(error.message);
+            if (error instanceof Error) {
+                core.setFailed(error.message);
+            }
         }
     });
 }
@@ -85,46 +90,40 @@ run();
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.bumpIOS = exports.bumpAndroid = void 0;
-const bumpAndroid = (json) => {
-    var _a, _b, _c;
-    const android = (_a = json === null || json === void 0 ? void 0 : json.expo) === null || _a === void 0 ? void 0 : _a.android;
-    const versionCode = (_c = (_b = json === null || json === void 0 ? void 0 : json.expo) === null || _b === void 0 ? void 0 : _b.android) === null || _c === void 0 ? void 0 : _c.versionCode;
+exports.setIOSVersion = exports.setAndroidVersion = void 0;
+const setAndroidVersion = (json, version) => {
+    var _a;
+    const android = json.expo.android;
     if (!android) {
         throw new Error('Android config missing in app.json, for more info see https://docs.expo.io/workflow/configuration/');
     }
+    const versionCode = (_a = json.expo.android) === null || _a === void 0 ? void 0 : _a.versionCode;
     if (versionCode === undefined || !Number.isInteger(versionCode)) {
         throw new Error(`Expected expo.android.versionCode to be an integer (found ${versionCode}), for more info see https://docs.expo.io/workflow/configuration/`);
     }
-    const nextVersionCode = versionCode + 1;
+    const versionArray = version.split('.');
+    const nextVersionCode = parseInt(versionArray[0]) * 1000000 +
+        parseInt(versionArray[1]) * 1000 +
+        parseInt(versionArray[2]);
     android.versionCode = nextVersionCode;
     return nextVersionCode;
 };
-exports.bumpAndroid = bumpAndroid;
-const bumpIOS = (json) => {
-    var _a;
-    const ios = (_a = json === null || json === void 0 ? void 0 : json.expo) === null || _a === void 0 ? void 0 : _a.ios;
-    const buildNumberStr = ios === null || ios === void 0 ? void 0 : ios.buildNumber;
+exports.setAndroidVersion = setAndroidVersion;
+const setIOSVersion = (json, version) => {
+    const ios = json.expo.ios;
     if (!ios) {
         throw new Error('iOS config missing in app.json, for more info see https://docs.expo.io/workflow/configuration/');
     }
-    const buildNumber = parseFloat(buildNumberStr || '');
-    if (buildNumberStr === undefined ||
-        isNaN(buildNumber) ||
-        !Number.isInteger(buildNumber)) {
-        throw new Error(`Expected stringified integer at path expo.ios.buildNumber (found ${buildNumberStr}), for more info see https://docs.expo.io/workflow/configuration/`);
-    }
-    const nextBuildNumber = (buildNumber + 1).toString();
-    ios.buildNumber = nextBuildNumber;
-    return nextBuildNumber;
+    ios.buildNumber = version;
+    return version;
 };
-exports.bumpIOS = bumpIOS;
+exports.setIOSVersion = setIOSVersion;
 
 
 /***/ }),
 
 /***/ 351:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -148,8 +147,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issue = exports.issueCommand = void 0;
-const os = __importStar(__webpack_require__(87));
-const utils_1 = __webpack_require__(278);
+const os = __importStar(__nccwpck_require__(87));
+const utils_1 = __nccwpck_require__(278);
 /**
  * Commands
  *
@@ -222,7 +221,7 @@ function escapeProperty(s) {
 /***/ }),
 
 /***/ 186:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -254,12 +253,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
-const command_1 = __webpack_require__(351);
-const file_command_1 = __webpack_require__(717);
-const utils_1 = __webpack_require__(278);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+const command_1 = __nccwpck_require__(351);
+const file_command_1 = __nccwpck_require__(717);
+const utils_1 = __nccwpck_require__(278);
+const os = __importStar(__nccwpck_require__(87));
+const path = __importStar(__nccwpck_require__(622));
 /**
  * The code to exit an action
  */
@@ -340,6 +339,21 @@ function getInput(name, options) {
     return val.trim();
 }
 exports.getInput = getInput;
+/**
+ * Gets the values of an multiline input.  Each value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string[]
+ *
+ */
+function getMultilineInput(name, options) {
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter(x => x !== '');
+    return inputs;
+}
+exports.getMultilineInput = getMultilineInput;
 /**
  * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
  * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
@@ -507,7 +521,7 @@ exports.getState = getState;
 /***/ }),
 
 /***/ 717:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
 // For internal use, subject to change.
@@ -534,9 +548,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issueCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(87));
-const utils_1 = __webpack_require__(278);
+const fs = __importStar(__nccwpck_require__(747));
+const os = __importStar(__nccwpck_require__(87));
+const utils_1 = __nccwpck_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -581,33 +595,34 @@ exports.toCommandValue = toCommandValue;
 /***/ }),
 
 /***/ 84:
-/***/ ((module) => {
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
-
-
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ detectIndent)
+/* harmony export */ });
 // Detect either spaces or tabs but not both to properly handle tabs for indentation and spaces for alignment
 const INDENT_REGEX = /^(?:( )+|\t+)/;
 
-function getMostUsed(indents) {
-	let result = 0;
-	let maxUsed = 0;
-	let maxWeight = 0;
+const INDENT_TYPE_SPACE = 'space';
+const INDENT_TYPE_TAB = 'tab';
 
-	for (const [key, [usedCount, weight]] of indents) {
-		if (usedCount > maxUsed || (usedCount === maxUsed && weight > maxWeight)) {
-			maxUsed = usedCount;
-			maxWeight = weight;
-			result = key;
-		}
-	}
+/**
+Make a Map that counts how many indents/unindents have occurred for a given size and how many lines follow a given indentation.
 
-	return result;
+The key is a concatenation of the indentation type (s = space and t = tab) and the size of the indents/unindents.
+
+```
+indents = {
+	t3: [1, 0],
+	t4: [1, 5],
+	s5: [1, 0],
+	s12: [1, 0],
 }
-
-module.exports = string => {
-	if (typeof string !== 'string') {
-		throw new TypeError('Expected a string');
-	}
+```
+*/
+function makeIndentsMap(string, ignoreSingleSpaces) {
+	const indents = new Map();
 
 	// Remember the size of previous line's indentation
 	let previousSize = 0;
@@ -615,17 +630,6 @@ module.exports = string => {
 
 	// Indents key (ident type + size of the indents/unindents)
 	let key;
-
-	// Remember how many indents/unindents have occurred for a given size and how many lines follow a given indentation.
-	// The key is a concatenation of the indentation type (s = space and t = tab) and the size of the indents/unindents.
-	//
-	// indents = {
-	//    t3: [1, 0],
-	//    t4: [1, 5],
-	//    s5: [1, 0],
-	//   s12: [1, 0],
-	// }
-	const indents = new Map();
 
 	for (const line of string.split(/\n/g)) {
 		if (!line) {
@@ -644,11 +648,11 @@ module.exports = string => {
 			previousIndentType = '';
 		} else {
 			indent = matches[0].length;
+			indentType = matches[1] ? INDENT_TYPE_SPACE : INDENT_TYPE_TAB;
 
-			if (matches[1]) {
-				indentType = 's';
-			} else {
-				indentType = 't';
+			// Ignore single space unless it's the only indent detected to prevent common false positives
+			if (ignoreSingleSpaces && indentType === INDENT_TYPE_SPACE && indent === 1) {
+				continue;
 			}
 
 			if (indentType !== previousIndentType) {
@@ -667,46 +671,89 @@ module.exports = string => {
 				weight++;
 				// We use the key from previous loop
 			} else {
-				key = indentType + String(indentDifference > 0 ? indentDifference : -indentDifference);
+				const absoluteIndentDifference = indentDifference > 0 ? indentDifference : -indentDifference;
+				key = encodeIndentsKey(indentType, absoluteIndentDifference);
 			}
 
 			// Update the stats
 			entry = indents.get(key);
-
-			if (entry === undefined) {
-				entry = [1, 0]; // Init
-			} else {
-				entry = [++entry[0], entry[1] + weight];
-			}
+			entry = entry === undefined ? [1, 0] : [++entry[0], entry[1] + weight];
 
 			indents.set(key, entry);
 		}
 	}
 
-	const result = getMostUsed(indents);
+	return indents;
+}
 
-	let amount = 0;
+// Encode the indent type and amount as a string (e.g. 's4') for use as a compound key in the indents Map.
+function encodeIndentsKey(indentType, indentAmount) {
+	const typeCharacter = indentType === INDENT_TYPE_SPACE ? 's' : 't';
+	return typeCharacter + String(indentAmount);
+}
+
+// Extract the indent type and amount from a key of the indents Map.
+function decodeIndentsKey(indentsKey) {
+	const keyHasTypeSpace = indentsKey[0] === 's';
+	const type = keyHasTypeSpace ? INDENT_TYPE_SPACE : INDENT_TYPE_TAB;
+
+	const amount = Number(indentsKey.slice(1));
+
+	return {type, amount};
+}
+
+// Return the key (e.g. 's4') from the indents Map that represents the most common indent,
+// or return undefined if there are no indents.
+function getMostUsedKey(indents) {
+	let result;
+	let maxUsed = 0;
+	let maxWeight = 0;
+
+	for (const [key, [usedCount, weight]] of indents) {
+		if (usedCount > maxUsed || (usedCount === maxUsed && weight > maxWeight)) {
+			maxUsed = usedCount;
+			maxWeight = weight;
+			result = key;
+		}
+	}
+
+	return result;
+}
+
+function makeIndentString(type, amount) {
+	const indentCharacter = type === INDENT_TYPE_SPACE ? ' ' : '\t';
+	return indentCharacter.repeat(amount);
+}
+
+function detectIndent(string) {
+	if (typeof string !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	// Identify indents while skipping single space indents to avoid common edge cases (e.g. code comments)
+	// If no indents are identified, run again and include all indents for comprehensive detection
+	let indents = makeIndentsMap(string, true);
+	if (indents.size === 0) {
+		indents = makeIndentsMap(string, false);
+	}
+
+	const keyOfMostUsedIndent = getMostUsedKey(indents);
+
 	let type;
+	let amount = 0;
 	let indent = '';
 
-	if (result !== 0) {
-		amount = Number(result.slice(1));
-
-		if (result[0] === 's') {
-			type = 'space';
-			indent = ' '.repeat(amount);
-		} else {
-			type = 'tab';
-			indent = '\t'.repeat(amount);
-		}
+	if (keyOfMostUsedIndent !== undefined) {
+		({type, amount} = decodeIndentsKey(keyOfMostUsedIndent));
+		indent = makeIndentString(type, amount);
 	}
 
 	return {
 		amount,
 		type,
-		indent
+		indent,
 	};
-};
+}
 
 
 /***/ }),
@@ -714,21 +761,21 @@ module.exports = string => {
 /***/ 747:
 /***/ ((module) => {
 
-module.exports = require("fs");;
+module.exports = require("fs");
 
 /***/ }),
 
 /***/ 87:
 /***/ ((module) => {
 
-module.exports = require("os");;
+module.exports = require("os");
 
 /***/ }),
 
 /***/ 622:
 /***/ ((module) => {
 
-module.exports = require("path");;
+module.exports = require("path");
 
 /***/ })
 
@@ -738,10 +785,11 @@ module.exports = require("path");;
 /******/ 	var __webpack_module_cache__ = {};
 /******/ 	
 /******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
+/******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -753,7 +801,7 @@ module.exports = require("path");;
 /******/ 		// Execute the module function
 /******/ 		var threw = true;
 /******/ 		try {
-/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
 /******/ 			threw = false;
 /******/ 		} finally {
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
@@ -764,13 +812,46 @@ module.exports = require("path");;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	__webpack_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/************************************************************************/
+/******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(109);
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(109);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
