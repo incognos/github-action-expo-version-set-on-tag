@@ -23,3 +23,4 @@ jobs:
         with:
           filepath: './src/__tests__/app.json'
           platforms: 'ios,android'
+          tag: 'v1.2.3'
