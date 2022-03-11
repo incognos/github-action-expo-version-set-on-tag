@@ -1,6 +1,4 @@
-[![build-test](https://github.com/incognos/
-github-action-expo-version-set-on-tag/actions/workflows/test.yml/badge.svg)](https://github.com/incognos/
-github-action-expo-version-set-on-tag/actions/workflows/test.yml)
+[![build-test](https://github.com/incognos/github-action-expo-version-set-on-tag/actions/workflows/test.yml/badge.svg)](https://github.com/incognos/github-action-expo-version-set-on-tag/actions/workflows/test.yml)
 
 # Usage
 
