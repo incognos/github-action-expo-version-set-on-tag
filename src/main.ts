@@ -2,7 +2,6 @@
 import * as core from '@actions/core'
 import {setAndroidVersion, setIOSVersion} from './utils'
 import {Config} from './types'
-import detectIndent from 'detect-indent'
 import fs from 'fs'
 
 type Platform = 'android' | 'ios'
@@ -17,10 +16,7 @@ async function run(): Promise<void> {
 
     const jsonStr = fs.readFileSync(filepath, 'utf-8')
 
-    const indentInfo = detectIndent(jsonStr)
-    const indent = indentInfo.indent || '    '
-
-    core.debug(`Detected indent: ${indentInfo.amount} ${indentInfo.type}`)
+    const indent = '  '
 
     const json = JSON.parse(jsonStr) as Config
 
@@ -45,7 +41,7 @@ async function run(): Promise<void> {
 
     const output = JSON.stringify(json, null, indent)
 
-    core.debug(`Saving app.json`)
+    core.debug('Saving app.json')
 
     fs.writeFileSync(filepath, output)
   } catch (error) {

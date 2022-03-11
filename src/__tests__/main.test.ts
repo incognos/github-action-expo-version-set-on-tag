@@ -68,19 +68,23 @@ test('test bumps app.json', () => {
   process.env['INPUT_FILEPATH'] = filepath
   process.env['INPUT_PLATFORMS'] = 'ios,android'
   process.env['INPUT_TAG'] = 'v1.2.3'
+
   const np = process.execPath
   const ip = path.join(__dirname, '../..', 'lib', 'main.js')
   const options: cp.ExecFileSyncOptions = {
     env: process.env
   }
 
-  console.log(cp.execFileSync(np, [ip], options).toString())
+  cp.execFileSync(np, [ip], options)
 
   const afterFileStr = readFileSync(filepath, 'utf-8')
   const afterfile = JSON.parse(afterFileStr) as Config
 
-  expect(afterfile.expo.android!.versionCode).toEqual(1002003)
-  expect(afterfile.expo.ios!.buildNumber).toEqual('1.2.3')
+  expect(afterfile.expo.version).toEqual('1.2.3')
+  expect(afterfile.expo.android).toBeDefined()
+  expect(afterfile.expo.android?.versionCode).toEqual(1002003)
+  expect(afterfile.expo.ios).toBeDefined()
+  expect(afterfile.expo.ios?.buildNumber).toEqual('1.2.3')
 })
 
 test('test bumps app.json for only android', () => {
@@ -88,20 +92,21 @@ test('test bumps app.json for only android', () => {
   process.env['INPUT_FILEPATH'] = filepath
   process.env['INPUT_PLATFORMS'] = 'android'
   process.env['INPUT_TAG'] = 'v1.2.3'
+
   const np = process.execPath
   const ip = path.join(__dirname, '../..', 'lib', 'main.js')
   const options: cp.ExecFileSyncOptions = {
     env: process.env
   }
 
-  console.log(cp.execFileSync(np, [ip], options).toString())
+  cp.execFileSync(np, [ip], options)
 
   const afterFileStr = readFileSync(filepath, 'utf-8')
   const afterfile = JSON.parse(afterFileStr) as Config
 
-  expect(afterfile.expo.android!.versionCode).toEqual(1002003)
-  expect(afterfile.expo.ios!.buildNumber).toEqual(
-    afterfile.expo.ios!.buildNumber
+  expect(afterfile.expo.android?.versionCode).toEqual(1002003)
+  expect(afterfile.expo.ios?.buildNumber).toEqual(
+    afterfile.expo.ios?.buildNumber
   )
 })
 
@@ -110,22 +115,23 @@ test('test bumps app.json for only ios', () => {
   process.env['INPUT_FILEPATH'] = filepath
   process.env['INPUT_PLATFORMS'] = 'ios'
   process.env['INPUT_TAG'] = 'v1.2.3'
+
   const np = process.execPath
   const ip = path.join(__dirname, '../..', 'lib', 'main.js')
   const options: cp.ExecFileSyncOptions = {
     env: process.env
   }
 
+  cp.execFileSync(np, [ip], options)
+
   const prefileStr = readFileSync(filepath, 'utf-8')
   const prefile = JSON.parse(prefileStr) as Config
-
-  console.log(cp.execFileSync(np, [ip], options).toString())
 
   const afterFileStr = readFileSync(filepath, 'utf-8')
   const afterfile = JSON.parse(afterFileStr) as Config
 
-  expect(afterfile.expo.android!.versionCode).toEqual(
-    prefile.expo.android!.versionCode
+  expect(afterfile.expo.android?.versionCode).toEqual(
+    prefile.expo.android?.versionCode
   )
-  expect(afterfile.expo.ios!.buildNumber).toEqual('1.2.3')
+  expect(afterfile.expo.ios?.buildNumber).toEqual('1.2.3')
 })

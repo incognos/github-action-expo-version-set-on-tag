@@ -2,7 +2,7 @@
   "name": "expo-version-bump-on-tag",
   "version": "0.0.1",
   "private": true,
-  "description": "Bumps  ios and android version numbers based on the GH tag",
+  "description": "Bumps ios and android version numbers based on the GH tag",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
