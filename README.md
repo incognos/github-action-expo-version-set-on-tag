@@ -1,4 +1,6 @@
-[![build-test](https://github.com/robertherber/github-action-bump-eas-buildnumber/actions/workflows/test.yml/badge.svg)](https://github.com/incognos/github-action-eas-buildnumber-by-tag/actions/workflows/test.yml)
+[![build-test](https://github.com/incognos/
+github-action-expo-version-set-on-tag/actions/workflows/test.yml/badge.svg)](https://github.com/incognos/
+github-action-expo-version-set-on-tag/actions/workflows/test.yml)
 
 # Usage
 
@@ -21,6 +23,10 @@ Limitations:
 - This solely bumps the app.json and does not commit/push the change, which is probably something you want to do after the build is successful.
 - You can commit the changes to the branch and then `git -f -a {tag}` to move the tag to the new commit
 - Please note that it will only work for app.json and not app.config.js, then you'll have to roll your own.
+
+Credits:
+
+- based on https://github.com/robertherber/github-action-bump-eas-buildnumber
 
 # Contribution Guide
 
