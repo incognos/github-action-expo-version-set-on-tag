@@ -1,5 +1,8 @@
-name: 'Set Expo build numbers'
+name: 'Set Expo build numbers using tag'
 description: 'Sets the version, buildNumber and versionCode in app.json'
+branding:
+  icon: 'arrow-up-circle'
+  color: 'purple'
 author: 'Sina Khelil'
 outputs:
   version:
