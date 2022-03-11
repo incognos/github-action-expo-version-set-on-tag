@@ -2,7 +2,7 @@
 
 # Usage
 
-This action sets the versionCode and buildNumber in app.json for Expo projects based on the tag. In your workflow you probably want to commit/push the changes after your build is successful.
+This action sets the version, versionCode and buildNumber in app.json for Expo projects to the semver tag (i.e. v1.2.3 be comes version: 1.2.3, versionCode: 1002003 and buildNumber: 1.2.3). In your workflow you probably want to commit/push the changes to the same tag after your build is successful.
 
 Input:
 
@@ -12,12 +12,14 @@ Input:
 
 Output:
 
+- version - The bumped iOS buildnumber removes any non-numeric or non-'.'
 - versioncode - The bumped Android versioncode, e.g. 1000001 or v2.4.6 == 2004006 (major * 1000000 + minor * 1000 + patch)
 - buildnumber - The bumped iOS buildnumber removes any non-numeric or non-'.'
 
 Limitations:
 
 - This solely bumps the app.json and does not commit/push the change, which is probably something you want to do after the build is successful.
+- You can commit the changes to the branch and then `git -f -a {tag}` to move the tag to the new commit
 - Please note that it will only work for app.json and not app.config.js, then you'll have to roll your own.
 
 # Contribution Guide

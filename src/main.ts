@@ -26,6 +26,7 @@ async function run(): Promise<void> {
 
     const nextVersion = tagStr.replace(/^v/, '')
     json.expo.version = nextVersion
+    core.setOutput('version', nextVersion)
 
     if (platforms.includes('android')) {
       const versionCode = setAndroidVersion(json, nextVersion)
